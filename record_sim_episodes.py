@@ -41,7 +41,7 @@ def main(args):
         policy_cls = InsertionPolicy
     else:
         raise NotImplementedError
-
+    plt_img = None
     success = []
     for episode_idx in range(num_episodes):
         print(f'{episode_idx=}')
