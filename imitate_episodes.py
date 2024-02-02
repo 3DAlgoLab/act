@@ -1,24 +1,23 @@
-import torch
-import numpy as np
+import argparse
 import os
 import pickle
-import argparse
-import matplotlib.pyplot as plt
 from copy import deepcopy
-from tqdm import tqdm
-from einops import rearrange
-
-from constants import DT
-from constants import PUPPET_GRIPPER_JOINT_OPEN
-from utils import load_data # data functions
-from utils import sample_box_pose, sample_insertion_pose # robot functions
-from utils import compute_dict_mean, set_seed, detach_dict # helper functions
-from policy import ACTPolicy, CNNMLPPolicy
-from visualize_episodes import save_videos
-
-from sim_env import BOX_POSE
 
 import IPython
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
+from einops import rearrange
+from tqdm import tqdm
+
+from constants import DT, PUPPET_GRIPPER_JOINT_OPEN
+from policy import ACTPolicy, CNNMLPPolicy
+from sim_env import BOX_POSE
+from utils import compute_dict_mean  # robot functions; helper functions
+from utils import load_data  # data functions
+from utils import detach_dict, sample_box_pose, sample_insertion_pose, set_seed
+from visualize_episodes import save_videos
+
 e = IPython.embed
 
 def main(args):
@@ -179,8 +178,8 @@ def eval_bc(config, ckpt_name, save_episode=True):
 
     # load environment
     if real_robot:
-        from aloha_scripts.robot_utils import move_grippers # requires aloha
-        from aloha_scripts.real_env import make_real_env # requires aloha
+        from aloha_scripts.real_env import make_real_env  # requires aloha
+        from aloha_scripts.robot_utils import move_grippers  # requires aloha
         env = make_real_env(init_node=True)
         env_max_reward = 0
     else:
@@ -361,6 +360,7 @@ def train_bc(train_dataloader, val_dataloader, config):
         # training
         policy.train()
         optimizer.zero_grad()
+        batch_idx = -1
         for batch_idx, data in enumerate(train_dataloader):
             forward_dict = forward_pass(data, policy)
             # backward
@@ -369,6 +369,8 @@ def train_bc(train_dataloader, val_dataloader, config):
             optimizer.step()
             optimizer.zero_grad()
             train_history.append(detach_dict(forward_dict))
+            
+        assert batch_idx != -1
         epoch_summary = compute_dict_mean(train_history[(batch_idx+1)*epoch:(batch_idx+1)*(epoch+1)])
         epoch_train_loss = epoch_summary['loss']
         print(f'Train loss: {epoch_train_loss:.5f}')

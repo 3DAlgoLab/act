@@ -2,11 +2,12 @@
 import argparse
 from pathlib import Path
 
+import IPython
 import numpy as np
 import torch
+
 from .models import build_ACT_model, build_CNNMLP_model
 
-import IPython
 e = IPython.embed
 
 def get_args_parser():
@@ -68,7 +69,8 @@ def get_args_parser():
 
 
 def build_ACT_model_and_optimizer(args_override):
-    parser = argparse.ArgumentParser('DETR training and evaluation script', parents=[get_args_parser()])
+    parser = argparse.ArgumentParser('DETR training and evaluation script', 
+                                     parents=[get_args_parser()])
     args = parser.parse_args()
 
     for k, v in args_override.items():
