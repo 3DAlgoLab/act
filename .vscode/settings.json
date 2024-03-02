@@ -6,6 +6,8 @@
     "fromto",
     "mjcf",
     "mujoco",
+    "nbytes",
+    "rdcc",
     "reparametrize",
     "timestep",
     "worldbody"
